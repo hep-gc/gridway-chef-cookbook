@@ -1,0 +1,16 @@
+service gsiftp
+{
+instances               = 100
+socket_type             = stream
+wait                    = no
+user                    = root
+env                     += GLOBUS_LOCATION=<%= node[:globus][:location] %>
+env                     += LD_LIBRARY_PATH=<%= node[:globus][:location] %>/lib
+env                     += GLOBUS_TCP_PORT_RANGE=50000,50199
+
+server                  = <%= node[:globus][:location] %>/sbin/globus-gridftp-server
+server_args             = -i
+log_on_success          += DURATION
+nice                    = 10
+disable                 = no
+}

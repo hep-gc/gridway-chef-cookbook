@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+export GLOBUS_OPTIONS="-Xms256M -Xmx2048M -Xmx2048M -Dorg.globus.tcp.port.range=50000,53199"
+export GLOBUS_TCP_PORT_RANGE=50000,53199
+
+cd $GLOBUS_LOCATION
+case "$1" in
+    start)
+        $GLOBUS_LOCATION/sbin/globus-start-container-detached -p 8443
+        $GW_LOCATION/bin/gwd -m
+        ;;
+    stop)
+        $GLOBUS_LOCATION/sbin/globus-stop-container-detached
+	pkill gwd
+        ;;
+    restart)
+        $GLOBUS_LOCATION/start-stop stop
+        $GLOBUS_LOCATION/start-stop start
+        ;;
+    *)
+        echo "Usage: globus {start|stop}" >&2
+        exit 1
+       ;;
+esac
+exit 0

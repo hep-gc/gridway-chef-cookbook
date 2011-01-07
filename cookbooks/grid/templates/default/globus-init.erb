@@ -1,0 +1,26 @@
+#!/bin/sh -e
+#
+# /etc/init.d/globus
+#
+# chkconfig: 2345 70 80
+# description: This starts up the globus ws container
+
+case "$1" in
+  start)
+  runuser - <%= node[:globus][:user] %> <%= node[:globus][:location] %>/bin/globus-start-stop start
+    ;;
+  stop)
+    runuser - <%= node[:globus][:user] %> <%= node[:globus][:location] %>/bin/globus-start-stop stop
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    printf "Usage: $0 {start|stop|restart}\n" >&2
+    exit 1
+    ;;
+esac
+exit 0
+
