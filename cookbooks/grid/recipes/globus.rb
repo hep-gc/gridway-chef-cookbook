@@ -105,6 +105,10 @@ service "globus" do
    action [:enable]
 end
 
+service "xinetd" do
+  action [:start]
+end
+
 template "/etc/xinetd.d/gsiftp" do
   source "gsiftp.erb"
 end
@@ -162,9 +166,13 @@ end
 bash "set_rft_password" do
 user node[:globus][:user]
   environment({'GLOBUS_LOCATION' => node[:globus][:location],
+               'RFT_USER' => node[:globus][:user],
                'RFT_PASSWORD' => node[:globus][:rft_password]})
   code <<-EOH
+  echo sed -i s/foo/$RFT_PASSWORD/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
+  echo sed -i s/root/$RFT_USER/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
   sed -i s/foo/$RFT_PASSWORD/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
+  sed -i s/root/$RFT_USER/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
   EOH
   only_if "grep foo $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml"
 end
@@ -225,10 +233,7 @@ bash "install_grid_canada" do
   not_if {File.exists?("/etc/grid-security/certificates/bffbd7d0.0")}
 end
 
-ruby_block "cert_warning" do
-  block do
-    log "You still need to put your host and container certs in /etc/grid-security"
-  end
-  not_if "test -f /etc/grid-security/hostcert.pem" and "test -f /etc/grid-security/containercert.pem"
+if not File.exists?("/etc/grid-security/hostcert.pem")
+  log "You still need to put your host and container certs in /etc/grid-security"
 end
 log "Your grid users are: " + node[:globus][:grid_users].join(", ")
