@@ -116,7 +116,6 @@ bash "force_start_xinetd" do
   not_if "service xinetd status | grep running"
 end
 
-
 template "/etc/xinetd.d/gsiftp" do
   source "gsiftp.erb"
 end

@@ -26,7 +26,8 @@ directory node[:gridway][:location] do
 end
 
 bash "build_gridway" do
-user node[:globus][:user]
+  user node[:globus][:user]
+  group node[:globus][:group]
   cwd node[:gridway][:source_dir]
   environment({'JAVA_HOME' => "/usr/java/latest/",
                'GLOBUS_LOCATION' => node[:globus][:location],
@@ -74,7 +75,8 @@ execute "tar" do
 end
 
 bash "build_gridgateway" do
-user node[:globus][:user]
+  user node[:globus][:user]
+  group node[:globus][:group]
   cwd node[:gridgateway][:source_dir] + "/components"
   environment({'JAVA_HOME' => "/usr/java/latest/",
                'GLOBUS_LOCATION' => node[:globus][:location],
@@ -92,21 +94,29 @@ user node[:globus][:user]
 end
 
 template node[:gridway][:location] + "/etc/gwd.conf" do
+  owner node[:globus][:user]
+  group node[:globus][:group]
   mode "644"
   source "gwd.conf.erb"
 end
 
 template node[:gridway][:location] + "/etc/example.com.attr" do
+  owner node[:globus][:user]
+  group node[:globus][:group]
   mode "644"
   source "example.com.attr.erb"
 end
 
 template node[:gridway][:location] + "/etc/host.list" do
+  owner node[:globus][:user]
+  group node[:globus][:group]
   mode "644"
   source "host.list.erb"
 end
 
 template node[:gridway][:location] + "/etc/wshost.list" do
+  owner node[:globus][:user]
+  group node[:globus][:group]
   mode "644"
   source "host.list.erb"
 end
@@ -121,9 +131,9 @@ bash "add_sudo_rules" do
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_em_mad_prews *\n" >> /etc/sudoers
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_em_mad_ws *\n" >> /etc/sudoers
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_tm_mad_ftp *\n" >> /etc/sudoers
-  printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_em_mad_dummy *\n" >> /etc/sudoers
+  printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_tm_mad_dummy *\n" >> /etc/sudoers
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GLOBUS_LOCATION/bin/grid-proxy-info *\n" >> /etc/sudoers
-  printf 'Defaults>%%$GRID_GROUP env_keep=\"GW_LOCATION GLOBUS_LOCATION GLOBUS_TCP_PORT_RANGE X509_USER_PROXY X509_USER_KEY X509_USER_CERT\n" >> /etc/sudoers 
+  printf "Defaults>%%$GRID_GROUP env_keep=\\"GW_LOCATION GLOBUS_LOCATION GLOBUS_TCP_PORT_RANGE X509_USER_PROXY X509_USER_KEY X509_USER_CERT\\"\n" >> /etc/sudoers 
   EOH
   not_if "grep gw_em /etc/sudoers"
 end
