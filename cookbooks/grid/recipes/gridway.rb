@@ -82,11 +82,13 @@ user node[:globus][:user]
   code <<-EOH
   export GW_LOCATION
   export GLOBUS_LOCATION
+  export PATH=$PATH:$GW_LOCATION/bin/
+  . $GLOBUS_LOCATION/etc/globus-user-env.sh
   . $GLOBUS_LOCATION/etc/globus-devel-env.sh
   gpt-build -force gcc32dbg globus_gram_job_manager_setup_gw.tar.gz globus_scheduler_event_generator_gw.tar.gz globus_scheduler_provider_setup_gw.tar.gz globus_wsrf_gram_service_java_setup.tar.gz
   gpt-postinstall -force
   EOH
-  #not_if {File.exists?("#{node[:gridway][:location]}/bin/gwps")}
+  not_if {File.exists?("#{node[:globus][:location]}/lib/perl/Globus/GRAM/JobManager/gw.pm")}
 end
 
 template node[:gridway][:location] + "/etc/gwd.conf" do
@@ -121,7 +123,7 @@ bash "add_sudo_rules" do
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_tm_mad_ftp *\n" >> /etc/sudoers
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GW_LOCATION/bin/gw_em_mad_dummy *\n" >> /etc/sudoers
   printf "$GW_USER ALL=(%%$GRID_GROUP) NOPASSWD: $GLOBUS_LOCATION/bin/grid-proxy-info *\n" >> /etc/sudoers
-  printf 'Defaults>%%$GRID_GROUP env_keep=\"GW_LOCATION GLOBUS_LOCATION GLOBUS_TCP_PORT_RANGE X509_USER_PROXY X509_USER_KEY X509_USER_CERT\" >> /etc/sudoers 
+  printf 'Defaults>%%$GRID_GROUP env_keep=\"GW_LOCATION GLOBUS_LOCATION GLOBUS_TCP_PORT_RANGE X509_USER_PROXY X509_USER_KEY X509_USER_CERT\n" >> /etc/sudoers 
   EOH
   not_if "grep gw_em /etc/sudoers"
 end

@@ -169,12 +169,10 @@ user node[:globus][:user]
                'RFT_USER' => node[:globus][:user],
                'RFT_PASSWORD' => node[:globus][:rft_password]})
   code <<-EOH
-  echo sed -i s/foo/$RFT_PASSWORD/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
-  echo sed -i s/root/$RFT_USER/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
   sed -i s/foo/$RFT_PASSWORD/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
   sed -i s/root/$RFT_USER/ $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml
   EOH
-  only_if "grep foo $GLOBUS_LOCATION/etc/globus_wsrf_rft/jndi-config.xml"
+  only_if "grep foo #{node[:globus][:location]}/etc/globus_wsrf_rft/jndi-config.xml"
 end
 
 bash "set_sudo_rules" do
