@@ -106,8 +106,16 @@ service "globus" do
 end
 
 service "xinetd" do
-  action [:start]
+  supports :status => true, :restart => true, :reload => true
+  action [:enable, :start]
 end
+
+# Crappy hack becuase xinetd returns 0 when stopped:
+bash "force_start_xinetd" do
+  code "service xinetd start"
+  not_if "service xinetd status | grep running"
+end
+
 
 template "/etc/xinetd.d/gsiftp" do
   source "gsiftp.erb"
